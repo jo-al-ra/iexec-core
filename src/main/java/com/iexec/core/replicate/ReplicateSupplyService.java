@@ -176,6 +176,10 @@ public class ReplicateSupplyService {
      * {@literal false} otherwise.
      */
     private boolean acceptOrRejectTask(Task task, String walletAddress) {
+        if (!workerService.isAllowedToJoin(walletAddress)) {
+            workerService.deleteWorkerByAddress(walletAddress);
+            return false;
+        }
         if (task.getEnclaveChallenge().isEmpty()) {
             return false;
         }
