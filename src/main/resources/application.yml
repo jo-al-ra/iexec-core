@@ -38,7 +38,6 @@ workers:
   #     address2,
   #     address3}
   whitelist: ${IEXEC_WORKERS_WHITELIST:}
-  workerPassRequired: ${IEXEC_WORKER_PASS_REQUIRED:false}
 
 wallet:
   encryptedFilePath: ${IEXEC_CORE_WALLET_PATH:./src/main/resources/wallet/encrypted-wallet_scheduler.json}

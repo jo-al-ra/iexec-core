@@ -16,6 +16,7 @@
 
 package com.iexec.core.worker;
 
+import com.iexec.core.chain.ChainConfig;
 import com.iexec.core.chain.WorkerPassService;
 import com.iexec.core.configuration.WorkerConfiguration;
 import lombok.extern.slf4j.Slf4j;
@@ -35,12 +36,16 @@ public class WorkerService {
     private final WorkerRepository workerRepository;
     private final WorkerConfiguration workerConfiguration;
     private final WorkerPassService workerPassService;
+    private final ChainConfig chainConfig;
 
     public WorkerService(WorkerRepository workerRepository,
-                         WorkerConfiguration workerConfiguration, WorkerPassService workerPassService) {
+                         WorkerConfiguration workerConfiguration,
+                         WorkerPassService workerPassService,
+                         ChainConfig chainConfig) {
         this.workerRepository = workerRepository;
         this.workerConfiguration = workerConfiguration;
         this.workerPassService = workerPassService;
+        this.chainConfig = chainConfig;
     }
 
     public Optional<Worker> getWorker(String walletAddress) {
@@ -68,7 +73,7 @@ public class WorkerService {
         boolean isAllowedByWhitelist = whitelist.isEmpty() || whitelist.contains(workerAddress);
 
 //        return early to avoid errors from missing configuration of the address for the WorkerPassContract
-        if (!workerConfiguration.getWorkerPassRequired()) {
+        if (chainConfig.getWorkerPassAddress().isBlank()) {
             return isAllowedByWhitelist;
         }
         boolean isAllowedByWorkerPass = workerPassService.hasWorkerPass(workerAddress).isPresent() && workerPassService.hasWorkerPass(workerAddress).get();
@@ -80,7 +85,7 @@ public class WorkerService {
         return isAllowedByWhitelist && isAllowedByWorkerPass;
     }
 
-    public Optional<Worker> deleteWorkerByAddress(String walletAddress){
+    public Optional<Worker> deleteWorkerByAddress(String walletAddress) {
         Optional<Worker> optional = workerRepository.findByWalletAddress(walletAddress);
         if (optional.isPresent()) {
             Worker worker = optional.get();
@@ -214,8 +219,7 @@ public class WorkerService {
         int runningReplicateNb = worker.getComputingChainTaskIds().size();
 
         if (runningReplicateNb >= workerMaxNbTasks) {
-            log.debug("Worker asking for too many replicates [walletAddress: {}, runningReplicateNb:{}, workerMaxNbTasks:{}]",
-                    walletAddress, runningReplicateNb, workerMaxNbTasks);
+            log.debug("Worker asking for too many replicates [walletAddress: {}, runningReplicateNb:{}, workerMaxNbTasks:{}]", walletAddress, runningReplicateNb, workerMaxNbTasks);
             return false;
         }
 

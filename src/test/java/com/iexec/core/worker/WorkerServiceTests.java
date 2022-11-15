@@ -16,6 +16,7 @@
 
 package com.iexec.core.worker;
 
+import com.iexec.core.chain.ChainConfig;
 import com.iexec.core.chain.WorkerPassService;
 import com.iexec.core.configuration.WorkerConfiguration;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +40,9 @@ class WorkerServiceTests {
 
     @Mock
     private WorkerConfiguration workerConfiguration;
+
+    @Mock
+    private ChainConfig chainConfig;
 
     @Mock
     private WorkerPassService workerPassService;
@@ -134,6 +138,7 @@ class WorkerServiceTests {
     @Test
     void shouldBeAllowed() {
         List<String> whiteList = List.of("w1", "w2");
+        when(chainConfig.getWorkerPassAddress()).thenReturn("");
         when(workerConfiguration.getWhitelist()).thenReturn(whiteList);
         assertThat(workerService.isAllowedToJoin("w1")).isTrue();
     }
@@ -141,13 +146,14 @@ class WorkerServiceTests {
     @Test
     void shouldBeAllowedWhenNoWhiteList() {
         when(workerConfiguration.getWhitelist()).thenReturn(List.of());
+        when(chainConfig.getWorkerPassAddress()).thenReturn("");
         assertThat(workerService.isAllowedToJoin("w1")).isTrue();
     }
 
     @Test
     void shouldBeAllowedWhenNoWhiteListAndHasPass() {
         when(workerConfiguration.getWhitelist()).thenReturn(List.of());
-        when(workerConfiguration.getWorkerPassRequired()).thenReturn(true);
+        when(chainConfig.getWorkerPassAddress()).thenReturn("0x123");
         when(workerPassService.hasWorkerPass("w1")).thenReturn(Optional.of(true));
         assertThat(workerService.isAllowedToJoin("w1")).isTrue();
     }
@@ -155,7 +161,7 @@ class WorkerServiceTests {
     @Test
     void shouldBeAllowedWhenNoWhiteListAndHasPassNotRequired() {
         when(workerConfiguration.getWhitelist()).thenReturn(List.of());
-        when(workerConfiguration.getWorkerPassRequired()).thenReturn(false);
+        when(chainConfig.getWorkerPassAddress()).thenReturn("");
         when(workerPassService.hasWorkerPass("w1")).thenReturn(Optional.of(false));
         assertThat(workerService.isAllowedToJoin("w1")).isTrue();
     }
@@ -163,7 +169,7 @@ class WorkerServiceTests {
     @Test
     void shouldBeAllowedWhenWhiteListAndHasPass() {
         when(workerConfiguration.getWhitelist()).thenReturn(List.of("w1"));
-        when(workerConfiguration.getWorkerPassRequired()).thenReturn(true);
+        when(chainConfig.getWorkerPassAddress()).thenReturn("0x123");
         when(workerPassService.hasWorkerPass("w1")).thenReturn(Optional.of(true));
         assertThat(workerService.isAllowedToJoin("w1")).isTrue();
     }
@@ -171,7 +177,7 @@ class WorkerServiceTests {
     @Test
     void shouldBeAllowedWhenNoWhiteListAndHasPassIsEmptyAndNotRequired() {
         when(workerConfiguration.getWhitelist()).thenReturn(List.of());
-        when(workerConfiguration.getWorkerPassRequired()).thenReturn(false);
+        when(chainConfig.getWorkerPassAddress()).thenReturn("");
         when(workerPassService.hasWorkerPass("w1")).thenReturn(Optional.empty());
         assertThat(workerService.isAllowedToJoin("w1")).isTrue();
     }
@@ -179,7 +185,7 @@ class WorkerServiceTests {
     @Test
     void shouldBeAllowedWhenWhiteListAndHasPassNotRequired() {
         when(workerConfiguration.getWhitelist()).thenReturn(List.of("w1"));
-        when(workerConfiguration.getWorkerPassRequired()).thenReturn(false);
+        when(chainConfig.getWorkerPassAddress()).thenReturn("");
         when(workerPassService.hasWorkerPass("w1")).thenReturn(Optional.of(false));
         assertThat(workerService.isAllowedToJoin("w1")).isTrue();
     }
@@ -187,7 +193,7 @@ class WorkerServiceTests {
     @Test
     void shouldNotBeAllowedWhenWhiteListAndNoHasPass() {
         when(workerConfiguration.getWhitelist()).thenReturn(List.of("w1"));
-        when(workerConfiguration.getWorkerPassRequired()).thenReturn(true);
+        when(chainConfig.getWorkerPassAddress()).thenReturn("0x123");
         when(workerPassService.hasWorkerPass("w1")).thenReturn(Optional.of(false));
         assertThat(workerService.isAllowedToJoin("w1")).isFalse();
     }
@@ -195,7 +201,7 @@ class WorkerServiceTests {
     @Test
     void shouldNotBeAllowedWhenNoWhiteListAndNoHasPass() {
         when(workerConfiguration.getWhitelist()).thenReturn(List.of());
-        when(workerConfiguration.getWorkerPassRequired()).thenReturn(true);
+        when(chainConfig.getWorkerPassAddress()).thenReturn("0x123");
         when(workerPassService.hasWorkerPass("w1")).thenReturn(Optional.of(false));
         assertThat(workerService.isAllowedToJoin("w1")).isFalse();
     }
@@ -203,7 +209,7 @@ class WorkerServiceTests {
     @Test
     void shouldNotBeAllowedWhenWrongWhiteListAndNoHasPass() {
         when(workerConfiguration.getWhitelist()).thenReturn(List.of("w2"));
-        when(workerConfiguration.getWorkerPassRequired()).thenReturn(true);
+        when(chainConfig.getWorkerPassAddress()).thenReturn("0x123");
         when(workerPassService.hasWorkerPass("w1")).thenReturn(Optional.of(false));
         assertThat(workerService.isAllowedToJoin("w1")).isFalse();
     }
@@ -211,7 +217,7 @@ class WorkerServiceTests {
     @Test
     void shouldNotBeAllowedWhenNoWhiteListAndHasPassIsEmpty() {
         when(workerConfiguration.getWhitelist()).thenReturn(List.of());
-        when(workerConfiguration.getWorkerPassRequired()).thenReturn(true);
+        when(chainConfig.getWorkerPassAddress()).thenReturn("0x123");
         when(workerPassService.hasWorkerPass("w1")).thenReturn(Optional.empty());
         assertThat(workerService.isAllowedToJoin("w1")).isFalse();
     }
@@ -219,6 +225,7 @@ class WorkerServiceTests {
     @Test
     void shouldNotBeAllowed() {
         List<String> whiteList = List.of("w1", "w2");
+        when(chainConfig.getWorkerPassAddress()).thenReturn("");
         when(workerConfiguration.getWhitelist()).thenReturn(whiteList);
         assertThat(workerService.isAllowedToJoin("w3")).isFalse();
     }
