@@ -22,6 +22,7 @@ import com.iexec.common.chain.eip712.entity.EIP712Challenge;
 import com.iexec.common.replicate.ComputeLogs;
 import com.iexec.common.task.TaskDescription;
 import com.iexec.common.utils.CredentialsUtils;
+import com.iexec.core.chain.ChainConfig;
 import com.iexec.core.chain.IexecHubService;
 import com.iexec.core.logs.TaskLogs;
 import com.iexec.core.logs.TaskLogsService;
@@ -69,6 +70,7 @@ class TaskControllerTests {
     @Mock private ReplicatesService replicatesService;
     @Mock private TaskService taskService;
     @Mock private TaskLogsService taskLogsService;
+    @Mock private ChainConfig chainConfig;
     @InjectMocks private TaskController taskController;
 
     @BeforeEach
@@ -235,6 +237,7 @@ class TaskControllerTests {
         when(iexecHubService.getTaskDescription(TASK_ID)).thenReturn(description);
         when(challengeService.getChallenge(requesterAddress)).thenReturn(challenge);
         when(taskLogsService.getComputeLogs(TASK_ID, WORKER_ADDRESS)).thenReturn(Optional.empty());
+        when(chainConfig.getWorkerPassAddress()).thenReturn("");
         ResponseEntity<TaskLogs> response = taskController.getTaskLogs(TASK_ID, authorization);
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         verify(iexecHubService).getTaskDescription(TASK_ID);
